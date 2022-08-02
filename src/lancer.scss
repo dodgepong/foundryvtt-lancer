@@ -2002,6 +2002,14 @@ a.activation-chip > i.mdi {
   flex-basis: 45%;
 }
 
+// Rest dialog
+
+.rest-wrapper .button-label {
+  background-color: var(--loadout-color);
+  color: black;
+  flex-basis: 45%;
+}
+
 // Macros
 .lancer-macro-grid {
   display: flex;

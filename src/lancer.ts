@@ -209,6 +209,7 @@ Hooks.once("init", async function () {
     prepareStructureSecondaryRollMacro: macros.prepareStructureSecondaryRollMacro,
     fullRepairMacro: macros.fullRepairMacro,
     stabilizeMacro: macros.stabilizeMacro,
+    restMacro: macros.restMacro,
     targetsFromTemplate: macros.targetsFromTemplate,
     migrations: migrations,
     getAutomationOptions: getAutomationOptions,

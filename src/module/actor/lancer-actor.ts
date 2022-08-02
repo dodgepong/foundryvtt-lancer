@@ -631,6 +631,134 @@ export class LancerActor extends Actor {
     return return_text;
   }
 
+  async rest(repairMech: number, heal: Boolean, repairWeaponIds: string[], repairSystemIds: string[], restoreStructure: number, restoreStress: number): Promise<string> {
+    let ent = await this.data.data.derived.mm_promise;
+
+    if (!(is_reg_mech(ent))) {
+      ui.notifications!.warn("This can't rest!");
+      return "";
+    }
+
+    let return_text = "";
+
+    await this.remove_all_active_effects();
+    ent.clear_statuses();
+    ent.CurrentHeat = 0;
+    ent.Burn = 0;
+    ent.Overshield = 0;
+
+    if (repairMech > 0 && ent.Destroyed) {
+      if (repairMech > 4) {
+        repairMech = 4;
+      }
+      if (ent.CurrentRepairs < repairMech) {
+        // todo: localize
+        return "Mech has decided to repair, but doesn't have enough repair cap left. Please try again.<br />";
+      } else {
+        ent.CurrentRepairs -= repairMech;
+        ent.repair_destroyed();
+        return_text.concat(`Mech has been repaired from being destroyed, costing ${repairMech} repair cap.`);
+      }
+    } else if (heal) {
+      if (ent.CurrentRepairs < 1) {
+        return "Mech has decided to repair HP, but doesn't have enough repair cap left. Please try again.<br />";
+      } else {
+        ent.CurrentRepairs -= 1;
+        ent.CurrentHP = ent.MaxHP
+        return_text.concat("Mech has repaired its HP back to full, costing 1 repair cap.");
+      }
+    }
+
+    // old-school for loops because forEach callbacks lose type inference of `ent`
+    for(let i = 0; i < repairWeaponIds.length; i++) {
+      let weaponId = repairWeaponIds[i];
+      for(let j = 0; j < ent.Loadout.WepMounts.length; j++) {
+        let mount = ent.Loadout.WepMounts[j];
+        for(let k = 0; k < mount.Slots.length; k++) {
+          let slot = mount.Slots[k];
+          if (slot.Weapon && slot.Weapon.RegistryID === weaponId && slot.Weapon.Destroyed) {
+            if (ent.CurrentRepairs > 0) {
+              ent.CurrentRepairs -= 1;
+              slot.Weapon.Destroyed = false;
+              if (slot.Mod && slot.Mod.Destroyed) {
+                slot.Mod.Destroyed = false;
+              }
+            } else {
+              return `Mech has decided to repair weapon ${slot.Weapon.Name}, but doesn't have enough repair cap left. Please try again.<br />`;
+            }
+          }
+        }
+      }
+    }
+
+    // old-school for loops because forEach callbacks lose type inference of `ent`
+    for(let i = 0; i < repairSystemIds.length; i++) {
+      let systemId = repairSystemIds[i];
+      for(let j = 0; j < ent.Loadout.Systems.length; j++) {
+        let system = ent.Loadout.Systems[j];
+        if (system.RegistryID === systemId && system.Destroyed) {
+          if (ent.CurrentRepairs > 0) {
+            ent.CurrentRepairs -= 1;
+            system.Destroyed = false;
+          } else {
+            return `Mech has decided to repair system ${system.Name}, but doesn't have enough repair cap left. Please try again.<br />`;
+          }
+        }
+      }
+    }
+
+    if (restoreStructure > 0) {
+      if (restoreStructure + ent.CurrentStructure > ent.MaxStructure) {
+        return_text = return_text.concat(`Mech has decided to restore ${restoreStructure} structure, but it only has ${ent.MaxStructure - ent.CurrentStructure} structure to repair.`);
+        restoreStructure = ent.MaxStructure - ent.CurrentStructure;
+      }
+
+      let repair_structure_cost = 2;
+      ent.Frame?.Traits.forEach(trait => {
+        trait.Bonuses.forEach(bonus => {
+          if (bonus.LID === "cheap_struct") {
+            repair_structure_cost = 1
+          }
+        });
+      });
+
+      if (restoreStructure * repair_structure_cost > ent.CurrentRepairs) {
+        return `Mech has decided to restore ${restoreStructure} structure, but doesn't have enough repair cap left. Please try again.<br />`;
+      } else {
+        ent.CurrentRepairs -= restoreStructure * repair_structure_cost;
+        ent.CurrentStructure += restoreStructure;
+        return_text = return_text.concat(`Mech has restored ${restoreStructure} structure, costing ${restoreStructure * repair_structure_cost} repair cap.`);
+      }
+    }
+
+    if (restoreStress > 0) {
+      if (restoreStress + ent.CurrentStress > ent.MaxStress) {
+        return_text = return_text.concat(`Mech has decided to restore ${restoreStress} stress, but it only has ${ent.MaxStress - ent.CurrentStress} stress to repair.`);
+        restoreStress = ent.MaxStress - ent.CurrentStress;
+      }
+
+      let repair_stress_cost = 2;
+      ent.Frame?.Traits.forEach(trait => {
+        trait.Bonuses.forEach(bonus => {
+          if (bonus.LID === "cheap_stress") {
+            repair_stress_cost = 1
+          }
+        });
+      });
+
+      if (restoreStress * repair_stress_cost > ent.CurrentRepairs) {
+        return `Mech has decided to restore ${restoreStress} stress, but doesn't have enough repair cap left. Please try again.<br />`;
+      } else {
+        ent.CurrentRepairs -= restoreStress * repair_stress_cost;
+        ent.CurrentStress += restoreStress;
+        return_text = return_text.concat(`Mech has restored ${restoreStress} structure, costing ${restoreStress * repair_stress_cost} repair cap.`);
+      }
+    }
+
+    await ent.writeback();
+    return return_text;
+  }
+
   async damage_calc(damage: AppliedDamage, ap = false, paracausal = false): Promise<number> {
     const ent = await this.data.data.derived.mm_promise;
 

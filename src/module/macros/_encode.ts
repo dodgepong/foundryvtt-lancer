@@ -19,6 +19,7 @@ const encodedMacroWhitelist = [
   "prepareOverheatMacro",
   "prepareStructureMacro",
   "stabilizeMacro",
+  "restMacro",
   "structureMacro",
   "overheatMacro",
   "fullRepairMacro"

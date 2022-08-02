@@ -110,7 +110,7 @@ export function stat_rollable_card(title: string, icon: string, data_path: strin
 // Shows a compact readonly value
 export function compact_stat_view(icon: string, data_path: string, options: HelperOptions): string {
   let data_val = resolve_helper_dotpath(options, data_path);
-  return `        
+  return `
     <div class="compact-stat">
         <i class="${icon} i--m i--dark"></i>
         <span class="lancer-stat minor">${data_val}</span>
@@ -127,7 +127,7 @@ export function compact_stat_edit(icon: string, data_path: string, max_path: str
     max_html = `<span class="minor" style="max-width: min-content;" > / </span>
     <span class="lancer-stat minor">${max_val}</span>`;
   }
-  return `        
+  return `
         <div class="compact-stat">
           <i class="${icon} i--m i--dark"></i>
           ${std_num_input(data_path, ext_helper_hash(options, { classes: "lancer-stat minor" }))}
@@ -219,11 +219,14 @@ export function macro_button(
   let mIcon;
   switch (macro) {
     case "fullRepairMacro":
-      mIcon = "cci-repair";
+      mIcon = "cci-manufacturer";
       break;
-    case "stabilizeMacro":
-      mIcon = "cci-marker";
-      break;
+      case "stabilizeMacro":
+        mIcon = "cci-marker";
+        break;
+      case "restMacro":
+        mIcon = "cci-repair";
+        break;
     case "prepareOverheatMacro":
       mIcon = "cci-heat";
       break;
