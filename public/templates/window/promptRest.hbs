@@ -11,11 +11,11 @@
         <div class="flexrow">
           {{#if (isDestroyed)}}
             <span>&nbsp;&gt; CRITICAL: MECH DESTROYED</span>
-            {{!-- {{{std-checkbox "" label="Repair Mech?"  input_classes="repair-destroyed-mech" value=false}}} --}}
-
+            <div class="flexrow flex-center">
+              <label style="display:flex; align-items: center;">Repair Mech? <input type="checkbox" id="repair-mech" /></label>
+            </div>
           {{else if (lt currentHP maxHP)}}
           <span>&nbsp;&gt; HULL DAMAGED: [ {{currentHP}} / {{maxHP}} ]</span>
-            {{!-- {{{std-checkbox "" label="Restore Full HP"  input_classes="restore-hp" value=false}}} --}}
           {{else}}
           <span>&nbsp;&gt; NO HULL DAMAGE DETECTED</span>
           {{/if}}
@@ -66,7 +66,9 @@
               {{#each destroyedWeapons as |weapon index|}}
                 <div class="card">
                   <div class="lancer-header destroyed"><span>{{weapon.label}}</span></div>
-                  <div class="flexrow">Repair?</div>
+                  <div class="flexrow flex-center">
+                    <label style="display:flex; align-items: center;">Repair? <input type="checkbox" id="weapon-repair-{{index}}" /></label>
+                  </div>
                 </div>
               {{/each}}
               </div>
@@ -88,7 +90,9 @@
               {{#each destroyedSystems as |system index|}}
                 <div class="card">
                   <div class="lancer-header destroyed"><span>{{system.label}}</span></div>
-                  <div class="flexrow">Repair?</div>
+                  <div class="flexrow flex-center">
+                    <label style="display:flex; align-items: center;">Repair? <input type="checkbox" id="system-repair-{{index}}" /></label>
+                  </div>
                 </div>
               {{/each}}
               </div>
